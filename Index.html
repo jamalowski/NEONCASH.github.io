@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Cash Orbit v3</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #06070d;
+            --panel-bg: #111322;
+            --panel-border: rgba(0, 243, 255, 0.2);
+            --neon-cyan: #00f3ff;
+            --neon-magenta: #ff0055;
+            --neon-green: #39ff14;
+            --neon-amber: #ffaa00;
+            --text-color: #ffffff;
+            --text-muted: #5f6e8a;
+            --glow-cyan: 0 0 15px rgba(0, 243, 255, 0.7);
+            --glow-magenta: 0 0 15px rgba(255, 0, 85, 0.7);
+            --glow-green: 0 0 15px rgba(57, 255, 20, 0.7);
+            --glow-amber: 0 0 20px rgba(255, 170, 0, 0.8);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+            overflow-x: hidden;
+        }
+
+        /* Top Navigation Bar */
+        header {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 14px 24px;
+            background: linear-gradient(135deg, var(--panel-bg) 0%, #171a30 100%);
+            border-radius: 16px;
+            border: 1px solid var(--panel-border);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+        }
+
+        .logo {
+            font-weight: 900;
+            font-size: 1.6rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            background: linear-gradient(45deg, var(--neon-cyan), var(--neon-magenta));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(0, 243, 255, 0.4);
+        }
+
+        .balance-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 8px 18px;
+            border-radius: 30px;
+            border: 1px solid var(--neon-green);
+            box-shadow: inset var(--glow-green), var(--glow-green);
+        }
+
+        .balance-container i {
+            color: var(--neon-green);
+        }
+
+        #balance {
+            font-weight: 800;
+            font-size: 1.3rem;
+            letter-spacing: 1px;
+        }
+
+        /* Tabs Navigation */
+        .tabs-nav {
+            display: flex;
+            width: 100%;
+            max-width: 900px;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 16px;
+            background: var(--panel-bg);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px;
+            color: var(--text-muted);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .tab-btn:hover {
+            color: #fff;
+            background: rgba(255,255,255,0.02);
+            border-color: rgba(0, 243, 255, 0.3);
+        }
+
+        .tab-btn.active {
+            color: #000;
+            background: var(--neon-cyan);
+            border-color: var(--neon-cyan);
+            box-shadow: var(--glow-cyan);
+        }
+
+        .tab-btn.active-slots {
+            color: #000;
+            background: var(--neon-amber);
+            border-color: var(--neon-amber);
+            box-shadow: var(--glow-amber);
+        }
+
+        /* Main Elements */
+        main {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .tab-content {
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .tab-content.active {
+            display: flex;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .panel {
+            background: var(--panel-bg);
+            border-radius: 20px;
+            padding: 24px;
+            border: 1px solid var(--panel-border);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            position: relative;
+        }
+
+        /* Progress Bar */
+        .progress-section {
+            background: linear-gradient(180deg, #111322 0%, #16192e 100%);
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+        }
+
+        #points-display {
+            color: var(--neon-cyan);
+            text-shadow: var(--glow-cyan);
+            font-size: 1.3rem;
+        }
+
+        .progress-container {
+            position: relative;
+            width: 100%;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 4px;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #00f3ff, #ff0055);
+            border-radius: 50px;
+            box-shadow: var(--glow-cyan);
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .checkpoint {
+            position: absolute;
+            top: -3px;
+            width: 4px;
+            height: 46px;
+            background: #fff;
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+
+        .checkpoint.cp-3k { background: var(--neon-green); box-shadow: var(--glow-green); }
+        .checkpoint.cp-7k { background: var(--neon-amber); box-shadow: var(--glow-amber); }
+        .checkpoint.cp-10k { background: var(--neon-magenta); box-shadow: var(--glow-magenta); }
+
+        .checkpoint-label {
+            position: absolute;
+            top: -26px;
+            transform: translateX(-50%);
+            font-size: 0.75rem;
+            color: var(--text-color);
+            font-weight: 700;
+            white-space: nowrap;
+            background: rgba(0,0,0,0.7);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .timers-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            background: rgba(0,0,0,0.3);
+            padding: 10px 15px;
+            border-radius: 10px;
+        }
+
+        .timers-row span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .timers-row strong {
+            color: #fff;
+        }
+
+        /* KLASYCZNE LOSOWANIE */
+        .draw-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .draw-btn {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            border: none;
+            background: radial-gradient(circle, #191c33 0%, #080a12 100%);
+            cursor: pointer;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border: 5px solid var(--neon-cyan);
+            box-shadow: var(--glow-cyan), inset 0 0 20px rgba(0,243,255,0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .draw-btn:hover:not(:disabled) {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.9), inset 0 0 15px rgba(0, 243, 255, 0.4);
+            border-color: #fff;
+        }
+
+        .draw-btn:active:not(:disabled) { transform: scale(0.95); }
+        .draw-btn:disabled {
+            border-color: #24263a;
+            box-shadow: none;
+            cursor: not-allowed;
+            opacity: 0.4;
+        }
+
+        .draw-btn span {
+            font-size: 2rem;
+            font-weight: 900;
+            letter-spacing: 3px;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+
+        .draw-btn .draws-left {
+            font-size: 0.95rem;
+            color: var(--neon-cyan);
+            margin-top: 8px;
+            font-weight: 700;
+            background: rgba(0,0,0,0.5);
+            padding: 2px 10px;
+            border-radius: 10px;
+        }
+
+        /* Risk / Reward Panel */
+        .risk-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            width: 100%;
+            margin-top: 30px;
+            animation: fadeIn 0.4s ease;
+            background: rgba(0,0,0,0.4);
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px dashed rgba(255,255,255,0.1);
+        }
+
+        .drawn-value {
+            font-size: 2.6rem;
+            font-weight: 900;
+            color: var(--neon-green);
+            text-shadow: var(--glow-green);
+        }
+
+        .choice-buttons {
+            display: flex;
+            gap: 15px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 16px 20px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+
+        .btn-full {
+            background: var(--neon-green);
+            color: #000;
+            box-shadow: var(--glow-green);
+        }
+        .btn-full:hover { background: #2ee610; box-shadow: 0 0 20px rgba(57, 255, 20, 0.9); }
+
+        .btn-risk {
+            background: transparent;
+            color: var(--neon-magenta);
+            border: 2px solid var(--neon-magenta);
+            box-shadow: inset var(--glow-magenta);
+        }
+        .btn-risk:hover { background: rgba(255, 0, 85, 0.1); box-shadow: var(--glow-magenta); }
+
+        .risk-streak-info {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        .risk-streak-info span { color: var(--neon-magenta); font-weight: bold; }
+
+        /* AUTOMATY (SLOTS) - MEGA WOW VISUALS */
+        .slots-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+            position: relative;
+        }
+
+        .slot-machine {
+            background: linear-gradient(145deg, #0a0b12 0%, #15182a 100%);
+            border: 4px solid var(--neon-amber);
+            border-radius: 28px;
+            padding: 30px;
+            box-shadow: var(--glow-amber), inset 0 0 30px rgba(0,0,0,0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            width: 100%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        /* Animacja ramki automatu przy wygranej */
+        .slot-machine.wow-win {
+            animation: slotWinGlow 0.5s ease infinite alternate;
+        }
+
+        @keyframes slotWinGlow {
+            0% { border-color: var(--neon-amber); box-shadow: var(--glow-amber); }
+            100% { border-color: var(--neon-green); box-shadow: 0 0 30px rgba(57, 255, 20, 1), inset 0 0 20px rgba(57, 255, 20, 0.4); }
+        }
+
+        .slots-window {
+            display: flex;
+            gap: 15px;
+            background: #080911;
+            padding: 20px;
+            border-radius: 20px;
+            border: 2px solid rgba(255,170,0,0.3);
+            width: 100%;
+            justify-content: center;
+            position: relative;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+        }
+
+        .slot-reel {
+            width: 100px;
+            height: 100px;
+            background: #17192a;
+            border-radius: 16px;
+            border: 2px solid rgba(255,255,255,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.6);
+            overflow: hidden;
+            transition: all 0.1s ease;
+        }
+
+        /* Klasa dodająca efekt "WOW" przy trafieniu */
+        .slot-reel.pop-win {
+            animation: popWinAnim 0.4s ease cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-color: var(--neon-green);
+            background: rgba(57, 255, 20, 0.05);
+        }
+
+        @keyframes popWinAnim {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); filter: drop-shadow(0 0 15px var(--neon-green)); }
+            100% { transform: scale(1); }
+        }
+
+        .reel-spin {
+            animation: reelAnimate 0.12s infinite linear;
+        }
+
+        @keyframes reelAnimate {
+            0% { transform: translateY(-30px); opacity: 0.3; filter: blur(2px); }
+            100% { transform: translateY(30px); opacity: 0.3; filter: blur(2px); }
+        }
+
+        /* WOW Efekt rozbłysku wygranej tekstowej */
+        .win-announcement {
+            font-size: 1.3rem;
+            font-weight: 900;
+            text-align: center;
+            min-height: 30px;
+            color: var(--neon-amber);
+            text-shadow: var(--glow-amber);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .win-announcement.mega-wow {
+            color: var(--neon-green);
+            text-shadow: var(--glow-green);
+            animation: pulse 0.5s infinite alternate;
+        }
+
+        .slots-cost-info {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+        .slots-cost-info strong { color: var(--neon-amber); }
+
+        .btn-slots-spin {
+            background: var(--neon-amber);
+            color: #000;
+            box-shadow: var(--glow-amber);
+            width: 100%;
+            max-width: 280px;
+            font-size: 1.2rem;
+            padding: 16px;
+        }
+        .btn-slots-spin:hover:not(:disabled) { background: #ffbe33; box-shadow: 0 0 25px rgba(255,170,0,0.9); }
+        .btn-slots-spin:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+
+        /* Grid elements and layouts */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 { grid-template-columns: 1fr; }
+            .tabs-nav { gap: 5px; }
+            .tab-btn { padding: 12px 6px; font-size: 0.8rem; }
+        }
+
+        .btn-ad-trigger {
+            background: linear-gradient(90deg, #1d2033 0%, #292f4c 100%);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .btn-ad-trigger:hover {
+            border-color: var(--neon-cyan);
+            box-shadow: var(--glow-cyan);
+        }
+
+        /* Daily Pass */
+        .daily-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .daily-pass-container {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+        }
+
+        .daily-day {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.03);
+            border-radius: 8px;
+            padding: 10px 4px;
+            text-align: center;
+            font-size: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .daily-day.active {
+            border-color: var(--neon-cyan);
+            box-shadow: var(--glow-cyan);
+            background: rgba(0, 243, 255, 0.05);
+        }
+
+        .daily-day.completed {
+            border-color: var(--neon-green);
+            opacity: 0.6;
+        }
+
+        .daily-day .reward {
+            font-weight: bold;
+            color: var(--neon-green);
+        }
+
+        /* Stats & History Rows */
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 9px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            font-size: 0.9rem;
+        }
+        .stat-row:last-child { border: none; }
+        .stat-row span:last-child { font-weight: 700; color: var(--neon-cyan); }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            background: rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 3px solid var(--neon-cyan);
+        }
+
+        /* Overlays & Advertisements */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #04050a;
+            z-index: 9999;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .ad-content-box {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            padding: 40px;
+            border-radius: 24px;
+            max-width: 450px;
+            width: 90%;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.9);
+            position: relative;
+        }
+
+        .ad-spinner {
+            width: 70px;
+            height: 70px;
+            border: 6px solid rgba(255,255,255,0.05);
+            border-top-color: var(--neon-magenta);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 25px auto;
+            box-shadow: var(--glow-magenta);
+        }
+
+        #ad-timer-text {
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: var(--neon-magenta);
+            text-shadow: var(--glow-magenta);
+            margin: 10px 0;
+        }
+
+        .ad-placeholder-graphic {
+            width: 100%;
+            height: 120px;
+            background: radial-gradient(circle, #191b2b 0%, #0c0d17 100%);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            border: 1px dashed rgba(255,255,255,0.1);
+        }
+
+        /* Confetti / Particle system placeholder for WOW effects */
+        .wow-particle {
+            position: absolute;
+            pointer-events: none;
+            width: 8px;
+            height: 8px;
+            background: var(--neon-green);
+            border-radius: 50%;
+            animation: particleScatter 0.6s ease-out forwards;
+        }
+
+        @keyframes particleScatter {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--x), var(--y)) scale(0); opacity: 0; }
+        }
+
+        /* Utility animations */
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0% { transform: scale(1); } 100% { transform: scale(1.05); } }
+        
+        .bump { animation: bumpKey 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes bumpKey {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ekran startowy / Reklama przy wejściu -->
+    <div class="overlay" id="entry-ad-overlay" style="display: flex;">
+        <div class="ad-content-box">
+            <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; color: var(--neon-cyan)">Sponsorowane wprowadzenie</span>
+            <h2 style="margin-top: 10px; font-weight: 800;">Inicjalizacja bezpiecznej sesji...</h2>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 8px;">Za chwilę rozpocznie się gra. Obejrzyj spot promocyjny.</p>
+            <div id="entry-ad-timer" style="font-size: 2.5rem; font-weight: 900; color: var(--neon-cyan); margin: 15px 0;">5</div>
+            <div class="ad-placeholder-graphic">
+                <div style="text-align: center;"><i class="fa-solid fa-rectangle-ad" style="font-size: 2rem; color: var(--neon-cyan); margin-bottom: 5px;"></i><br>Ładowanie strumienia wideo...</div>
+            </div>
+            <button class="btn btn-full" id="btn-close-entry-ad" disabled style="opacity: 0.5; background: var(--neon-cyan); color:#000;">Czekaj...</button>
+        </div>
+    </div>
+
+    <!-- Główny ekran Reklamy podczas gry -->
+    <div class="overlay" id="standard-ad-overlay">
+        <div class="ad-content-box">
+            <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; color: var(--neon-magenta)">Weryfikacja Anty-Bot System</span>
+            <h2 style="margin-top: 5px;" id="ad-title-display">Trwa odtwarzanie reklamy</h2>
+            <div id="ad-timer-text">60</div>
+            <div class="ad-spinner"></div>
+            <p style="color: var(--text-muted); font-size: 0.8rem;">Zamknięcie okna spowoduje utratę nagrody i reset punktów.</p>
+        </div>
+    </div>
+
+    <!-- Panel Górny -->
+    <header>
+        <div class="logo">NeonCash</div>
+        <div class="balance-container" id="balance-badge">
+            <i class="fa-solid fa-wallet"></i>
+            <span id="balance">0.00$</span>
+        </div>
+    </header>
+
+    <!-- Nawigacja Zakładkami -->
+    <div class="tabs-nav">
+        <button class="tab-btn active" id="tab-link-draw" onclick="handleTabSwitch('draw')">
+            <i class="fa-solid fa-circle-dot"></i> Klasyczne Losowanie
+        </button>
+        <button class="tab-btn" id="tab-link-slots" onclick="handleTabSwitch('slots')">
+            <i class="fa-solid fa-dice"></i> Automat (Slots)
+        </button>
+    </div>
+
+    <main>
+        <!-- Główny pasek postępu (wspólny) -->
+        <section class="panel progress-section">
+            <div class="progress-info">
+                <span>Postęp Wyścigu 10K</span>
+                <span id="points-display">0 / 10000</span>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar" id="main-progress"></div>
+                
+                <!-- Checkpointy -->
+                <div class="checkpoint cp-3k" style="left: 30%;"><span class="checkpoint-label">3 000 pkt (0.03$)</span></div>
+                <div class="checkpoint cp-7k" style="left: 70%;"><span class="checkpoint-label">7 000 pkt (0.07$)</span></div>
+                <div class="checkpoint cp-10k" style="left: 100%;"><span class="checkpoint-label">10 000 pkt (0.10$)</span></div>
+            </div>
+            
+            <div class="timers-row">
+                <span><i class="fa-solid fa-stopwatch" style="color: var(--neon-magenta)"></i> Reset za: <strong id="reset-clock">03:00:00</strong></span>
+                <span><i class="fa-solid fa-clock" style="color: var(--neon-green)"></i> Aktywność (20m): <strong id="reward-clock">20:00</strong></span>
+            </div>
+        </section>
+
+        <!-- ZAKŁADKA 1: KLASYCZNE LOSOWANIE -->
+        <div id="tab-draw" class="tab-content active">
+            <section class="panel draw-section">
+                <button class="draw-btn" id="btn-main-draw" onclick="triggerMainDraw()">
+                    <span>LOSUJ</span>
+                    <div class="draws-left" id="draws-left-counter">7 / 7</div>
+                </button>
+
+                <!-- Przycisk doładowania darmowych szans przez reklamę -->
+                <div id="draws-refill-box" style="display: none; margin-top: 20px; width: 100%; text-align: center;">
+                    <p style="color: var(--text-muted); margin-bottom: 12px; font-size: 0.9rem;">Wykorzystałeś darmową pulę losowań!</p>
+                    <button class="btn" style="background:var(--neon-cyan); color:#000; box-shadow:var(--glow-cyan);" onclick="refillDrawsViaAd()">
+                        <i class="fa-solid fa-video"></i> Obejrzyj reklamę (+7 Losowań)
+                    </button>
+                </div>
+
+                <!-- Moduł Decyzji Ryzyka -->
+                <div class="risk-container" id="risk-panel">
+                    <span style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted);">Wynik losowania:</span>
+                    <div class="drawn-value" id="drawn-points-value">+0</div>
+                    <div class="choice-buttons">
+                        <button class="btn btn-full" onclick="settleReward(false)">
+                            <i class="fa-solid fa-bolt"></i> Pełna nagroda (Wymaga Reklamy)
+                        </button>
+                        <button class="btn btn-risk" onclick="settleReward(true)">
+                            Weź 40% mniej
+                        </button>
+                    </div>
+                    <div class="risk-streak-info">
+                        Wybór 40% mniej z rzędu: <span id="risk-streak-count">0</span>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ZAKŁADKA 2: AUTOMATY (SLOTS) -->
+        <div id="tab-slots" class="tab-content">
+            <section class="panel slots-section">
+                <div style="text-align: center;">
+                    <h2 style="color: var(--neon-amber); font-weight: 800; letter-spacing: 1px;">Cyber Slots Premium</h2>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 4px;">Traf identyczne neony i wywołaj Mega Efekt WOW!</p>
+                </div>
+
+                <div class="slot-machine" id="machine-box">
+                    <div class="slots-window">
+                        <div class="slot-reel" id="reel-1">7</div>
+                        <div class="slot-reel" id="reel-2">💎</div>
+                        <div class="slot-reel" id="reel-3">⚡</div>
+                    </div>
+
+                    <div class="win-announcement" id="slot-win-msg">System Gotowy</div>
+
+                    <div class="slots-cost-info">
+                        Koszt jednego spinu: <strong>1 Losowanie</strong>
+                    </div>
+
+                    <button class="btn btn-slots-spin" id="btn-slots-trigger" onclick="spinSlotMachine()">
+                        <i class="fa-solid fa-rotate"></i> ZAKRĘĆ
+                    </button>
+                </div>
+            </section>
+        </div>
+
+        <!-- STATYSTYKI I LOGI -->
+        <div class="grid-2">
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                <section class="panel">
+                    <h3 style="font-size: 1.1rem; margin-bottom: 15px;"><i class="fa-solid fa-gift" style="color: var(--neon-cyan)"></i> Premie Szybkie Video</h3>
+                    <button class="btn btn-ad-trigger" onclick="watchVoluntaryAd()" style="width: 100%;">
+                        Obejrzyj Sponsorowany klip (Premia)
+                    </button>
+                </section>
+
+                <section class="panel">
+                    <div class="daily-title">
+                        <span>Daily Pass Premium</span>
+                        <span style="color: var(--neon-cyan);" id="daily-streak-indicator">Dzień 1</span>
+                    </div>
+                    <div class="daily-pass-container" id="daily-pass-grid">
+                        <!-- Dynamiczne dni -->
+                    </div>
+                </section>
+            </div>
+
+            <section class="panel">
+                <h3 style="font-size: 1.1rem; margin-bottom: 12px;"><i class="fa-solid fa-chart-bar" style="color: var(--neon-cyan)"></i> Statystyki Ogólne</h3>
+                <div class="stat-row"><span>Czas na stronie:</span><span id="stat-time">0m 0s</span></div>
+                <div class="stat-row"><span>Wykonywane akcje (łącznie):</span><span id="stat-draws">0</span></div>
+                <div class="stat-row"><span>Zgromadzone punkty:</span><span id="stat-points">0</span></div>
+                <div class="stat-row"><span>Wygenerowane USD:</span><span id="stat-dollars">0.00$</span></div>
+                <div class="stat-row"><span>Obejrzane sekwencje reklam:</span><span id="stat-ads">0</span></div>
+                <div class="stat-row"><span>Zaliczone progi (Checkpointy):</span><span id="stat-checkpoints">0</span></div>
+                <div class="stat-row"><span>Pętli resetu ogółem:</span><span id="stat-resets">0</span></div>
+            </section>
+        </div>
+
+        <section class="panel">
+            <h3 style="font-size: 1.1rem; margin-bottom: 12px;"><i class="fa-solid fa-history" style="color: var(--neon-cyan)"></i> Ostatnie operacje</h3>
+            <div class="history-list" id="history-render-box"></div>
+        </section>
+    </main>
+
+    <script>
+        // --- Stan aplikacji (State) ---
+        let appState = {
+            balance: 0.00,
+            points: 0,
+            drawsLeft: 7,
+            riskStreak: 0,
+            dailyDay: 1,
+            lastDailyClaimTimestamp: 0,
+            history: [],
+            stats: {
+                draws: 0,
+                points: 0,
+                dollars: 0,
+                ads: 0,
+                resets: 0,
+                checkpoints: 0,
+                timeSpent: 0
+            },
+            resetTimerSeconds: 3 * 60 * 60,
+            timeRewardSeconds: 20 * 60
+        };
+
+        const dailyPayouts = [0.02, 0.04, 0.06, 0.08, 0.10, 0.15, 0.25];
+        const slotSymbols = ["🍒", "💎", "⚡", "🍀", "7"];
+        let currentDrawValueTemp = 0;
+        let currentTab = 'draw';
+
+        // --- Obsługa reklamy powitalnej ---
+        function runEntryAd() {
+            let count = 5;
+            const timerEl = document.getElementById('entry-ad-timer');
+            const closeBtn = document.getElementById('btn-close-entry-ad');
+            
+            const interval = setInterval(() => {
+                count--;
+                timerEl.innerText = count;
+                if(count <= 0) {
+                    clearInterval(interval);
+                    timerEl.style.display = 'none';
+                    closeBtn.innerText = "WEJDŹ DO GRY";
+                    closeBtn.disabled = false;
+                    closeBtn.style.opacity = "1";
+                    closeBtn.onclick = () => {
+                        document.getElementById('entry-ad-overlay').style.display = 'none';
+                        processDailyPassCheck();
+                    };
+                }
+            }, 1000);
+        }
+
+        // --- Zapis/Odczyt ---
+        function loadGameState() {
+            const savedData = localStorage.getItem('neon_cash_v3_storage');
+            if (savedData) {
+                try {
+                    const parsed = JSON.parse(savedData);
+                    appState = { ...appState, ...parsed };
+                    if(parsed.stats) appState.stats = { ...appState.stats, ...parsed.stats };
+                    if(parsed.history) appState.history = parsed.history;
+                } catch (e) { console.error(e); }
+            }
+            renderDailyPassUI();
+            updateGlobalUI();
+        }
+
+        function saveGameState() {
+            localStorage.setItem('neon_cash_v3_storage', JSON.stringify(appState));
+        }
+
+        // --- REKLAMA PRZY PRZEŁĄCZANIU ZAKŁADEK ---
+        function handleTabSwitch(targetTab) {
+            if (currentTab === targetTab) return;
+            
+            // Wymuszenie reklamy 10 sekund przy zmianie widoku / zakładki
+            displayFullscreenAd(10, "Optymalizacja widoku i ładowanie modułu", () => {
+                currentTab = targetTab;
+                document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+                document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active', 'active-slots'));
+                
+                document.getElementById(`tab-${targetTab}`).classList.add('active');
+                const btn = document.getElementById(`tab-link-${targetTab}`);
+                if (targetTab === 'slots') btn.classList.add('active-slots');
+                else btn.classList.add('active');
+            });
+        }
+
+        // --- Logika Losowania (Zakładka 1) ---
+        function triggerMainDraw() {
+            if (appState.drawsLeft <= 0) return;
+            appState.drawsLeft--;
+            appState.stats.draws++;
+
+            let min = 200, max = 400;
+            if (appState.points >= 3000 && appState.points < 7000) { min = 100; max = 250; }
+            else if (appState.points >= 7000 && appState.points < 9000) { min = 50; max = 150; }
+            else if (appState.points >= 9000) { min = 10; max = 80; }
+
+            currentDrawValueTemp = Math.floor(Math.random() * (max - min + 1)) + min;
+
+            document.getElementById('btn-main-draw').disabled = true;
+            document.getElementById('btn-slots-trigger').disabled = true;
+            document.getElementById('drawn-points-value').innerText = `+${currentDrawValueTemp}`;
+            document.getElementById('risk-panel').style.display = 'flex';
+
+            updateGlobalUI();
+            saveGameState();
+        }
+
+        function settleReward(wantsRiskReduction) {
+            let targetPoints = currentDrawValueTemp;
+            let triggersAd = false;
+            let adTime = 60;
+            let adTitle = "";
+
+            if (!wantsRiskReduction) {
+                // NOWOŚĆ: Pełna nagroda zawsze wymaga 60s reklamy
+                triggersAd = true;
+                adTitle = "Przetwarzanie pełnej puli punktów";
+                appState.riskStreak = 0;
+            } else {
+                // 40% mniej
+                appState.riskStreak++;
+                targetPoints = Math.round(currentDrawValueTemp * 0.6);
+                if (appState.riskStreak > 1) {
+                    triggersAd = true;
+                    adTitle = "Przetwarzanie redukcji ryzyka (-40%)";
+                }
+            }
+
+            const completeSettle = () => {
+                appState.points = Math.min(10000, appState.points + targetPoints);
+                appState.stats.points += targetPoints;
+
+                appState.history.unshift({
+                    type: "Losowanie",
+                    base: currentDrawValueTemp,
+                    mode: wantsRiskReduction ? "Zredukowany (-40%)" : "Pełna Nagroda",
+                    ad: triggersAd ? "Tak" : "Nie",
+                    final: targetPoints,
+                    time: new Date().toLocaleTimeString()
+                });
+                if (appState.history.length > 10) appState.history.pop();
+
+                document.getElementById('risk-panel').style.display = 'none';
+                if (appState.drawsLeft > 0) {
+                    document.getElementById('btn-main-draw').disabled = false;
+                    document.getElementById('btn-slots-trigger').disabled = false;
+                }
+
+                updateGlobalUI();
+                saveGameState();
+                triggerBumpAnimation(document.getElementById('points-display'));
+            };
+
+            if (triggersAd) {
+                displayFullscreenAd(adTime, adTitle, completeSettle);
+            } else {
+                completeSettle();
+            }
+        }
+
+        // --- Logika Automatu (Slots) + WOW EFFECTS ---
+        function spinSlotMachine() {
+            if (appState.drawsLeft <= 0) return;
+            appState.drawsLeft--;
+            appState.stats.draws++;
+
+            const r1 = document.getElementById('reel-1');
+            const r2 = document.getElementById('reel-2');
+            const r3 = document.getElementById('reel-3');
+            const spinBtn = document.getElementById('btn-slots-trigger');
+            const msg = document.getElementById('slot-win-msg');
+            const machine = document.getElementById('machine-box');
+
+            // Reset efektów WOW
+            machine.classList.remove('wow-win');
+            r1.classList.remove('pop-win');
+            r2.classList.remove('pop-win');
+            r3.classList.remove('pop-win');
+            msg.classList.remove('mega-wow');
+
+            r1.classList.add('reel-spin');
+            r2.classList.add('reel-spin');
+            r3.classList.add('reel-spin');
+            spinBtn.disabled = true;
+            document.getElementById('btn-main-draw').disabled = true;
+            msg.innerText = "Losowanie układu...";
+
+            setTimeout(() => {
+                r1.classList.remove('reel-spin');
+                const sym1 = slotSymbols[Math.floor(Math.random() * slotSymbols.length)];
+                r1.innerText = sym1;
+
+                setTimeout(() => {
+                    r2.classList.remove('reel-spin');
+                    const sym2 = slotSymbols[Math.floor(Math.random() * slotSymbols.length)];
+                    r2.innerText = sym2;
+
+                    setTimeout(() => {
+                        r3.classList.remove('reel-spin');
+                        const sym3 = slotSymbols[Math.floor(Math.random() * slotSymbols.length)];
+                        r3.innerText = sym3;
+
+                        let gainedPoints = 25;
+                        let winMessage = "Brak linii. Pocieszenie: +25 pkt";
+                        let isBigWin = false;
+                        let containsSeven = (sym1 === "7" || sym2 === "7" || sym3 === "7");
+
+                        if (sym1 === sym2 && sym2 === sym3) {
+                            isBigWin = true;
+                            if (sym1 === "7") { gainedPoints = 777; winMessage = "MEGA JACKPOT 777! +777 pkt"; }
+                            else if (sym1 === "💎") { gainedPoints = 450; winMessage = "Kryształowa Ściana! +450 pkt"; }
+                            else { gainedPoints = 300; winMessage = "Potrójna Linia! +300 pkt"; }
+                        } else if (sym1 === sym2 || sym2 === sym3 || sym1 === sym3) {
+                            gainedPoints = 80;
+                            winMessage = "Trafiono parę! +80 pkt";
+                        }
+
+                        // Obsługa Wygranej WOW
+                        if (isBigWin) {
+                            machine.classList.add('wow-win');
+                            r1.classList.add('pop-win');
+                            r2.classList.add('pop-win');
+                            r3.classList.add('pop-win');
+                            msg.classList.add('mega-wow');
+                            createWowParticles(machine);
+                        }
+
+                        msg.innerText = winMessage;
+
+                        const applySlotReward = () => {
+                            appState.points = Math.min(10000, appState.points + gainedPoints);
+                            appState.stats.points += gainedPoints;
+
+                            appState.history.unshift({
+                                type: "Automat",
+                                base: gainedPoints,
+                                mode: winMessage,
+                                ad: containsSeven ? "Wymuszona" : "Nie",
+                                final: gainedPoints,
+                                time: new Date().toLocaleTimeString()
+                            });
+                            if (appState.history.length > 10) appState.history.pop();
+
+                            if (appState.drawsLeft > 0) {
+                                spinBtn.disabled = false;
+                                document.getElementById('btn-main-draw').disabled = false;
+                            }
+                            updateGlobalUI();
+                            saveGameState();
+                            triggerBumpAnimation(document.getElementById('points-display'));
+                        };
+
+                        // NOWOŚĆ: Jeśli w układzie pojawiła się siódemka (7), wymuszamy reklamę 60s przed dopisaniem pkt
+                        if (containsSeven) {
+                            setTimeout(() => {
+                                displayFullscreenAd(60, "Autoryzacja Bonusu Szczęśliwej Siódemki", applySlotReward);
+                            }, 1000);
+                        } else {
+                            applySlotReward();
+                        }
+
+                    }, 400);
+                }, 400);
+            }, 600);
+        }
+
+        // WOW generator cząsteczek (eksplozja neonowa)
+        function createWowParticles(container) {
+            for (let i = 0; i < 30; i++) {
+                const p = document.createElement('div');
+                p.className = 'wow-particle';
+                const angle = Math.random() * Math.PI * 2;
+                const distance = Math.random() * 150 + 50;
+                p.style.setProperty('--x', `${Math.cos(angle) * distance}px`);
+                p.style.setProperty('--y', `${Math.sin(angle) * distance}px`);
+                p.style.left = "50%";
+                p.style.top = "40%";
+                p.style.background = ["#00f3ff", "#ff0055", "#39ff14", "#ffaa00"][Math.floor(Math.random() * 4)];
+                container.appendChild(p);
+                setTimeout(() => p.remove(), 600);
+            }
+        }
+
+        // --- Obsługa Reklam Fullscreen ---
+        function displayFullscreenAd(durationSeconds, adTitle, executeAtEndCallback) {
+            const overlay = document.getElementById('standard-ad-overlay');
+            const timerText = document.getElementById('ad-timer-text');
+            document.getElementById('ad-title-display').innerText = adTitle;
+            
+            overlay.style.display = 'flex';
+            let remain = durationSeconds;
+            timerText.innerText = remain;
+
+            appState.stats.ads++;
+            saveGameState();
+
+            const adCounterInterval = setInterval(() => {
+                remain--;
+                timerText.innerText = remain;
+                if (remain <= 0) {
+                    clearInterval(adCounterInterval);
+                    overlay.style.display = 'none';
+                    executeAtEndCallback();
+                    updateGlobalUI();
+                }
+            }, 1000);
+        }
+
+        function refillDrawsViaAd() {
+            displayFullscreenAd(15, "Doładowanie Energii i Szans", () => {
+                appState.drawsLeft = 7;
+                document.getElementById('btn-main-draw').disabled = false;
+                document.getElementById('btn-slots-trigger').disabled = false;
+            });
+        }
+
+        function watchVoluntaryAd() {
+            displayFullscreenAd(20, "Odbiór Szybkiej Premii Walutowej", () => {
+                const choicePool = Math.random() > 0.5;
+                if (choicePool) {
+                    const dynamicPoints = Math.floor(Math.random() * (250 - 100 + 1)) + 100;
+                    appState.points = Math.min(10000, appState.points + dynamicPoints);
+                    appState.stats.points += dynamicPoints;
+                    alert(`Premia: +${dynamicPoints} punktów!`);
+                } else {
+                    const dynamicCash = parseFloat((Math.random() * (0.03 - 0.01) + 0.01).toFixed(2));
+                    injectBalanceReward(dynamicCash);
+                    alert(`Premia: +${dynamicCash.toFixed(2)}$`);
+                }
+            });
+        }
+
+        // Autoodświeżanie bonusów co 4 minuty
+        setInterval(() => {
+            if (document.getElementById('entry-ad-overlay').style.display === 'none' && 
+                document.getElementById('standard-ad-overlay').style.display === 'none') {
+                displayFullscreenAd(15, "Sponsorowana weryfikacja stabilności łącza", () => {
+                    const loopBonus = Math.floor(Math.random() * (250 - 100 + 1)) + 100;
+                    appState.points = Math.min(10000, appState.points + loopBonus);
+                    appState.stats.points += loopBonus;
+                    triggerBumpAnimation(document.getElementById('points-display'));
+                });
+            }
+        }, 4 * 60 * 1000);
+
+        // --- Rozliczenia i Odliczanie ---
+        function injectBalanceReward(val) {
+            appState.balance = parseFloat((appState.balance + val).toFixed(2));
+            appState.stats.dollars = parseFloat((appState.stats.dollars + val).toFixed(2));
+            triggerBumpAnimation(document.getElementById('balance-badge'));
+        }
+
+        function forceIntervalReset() {
+            appState.stats.resets++;
+            let assignedCashReward = 0;
+            let checkpointsReached = 0;
+
+            if (appState.points >= 10000) { assignedCashReward = 0.10; checkpointsReached = 3; }
+            else if (appState.points >= 7000) { assignedCashReward = 0.07; checkpointsReached = 2; }
+            else if (appState.points >= 3000) { assignedCashReward = 0.04; checkpointsReached = 1; }
+
+            if (assignedCashReward > 0) {
+                injectBalanceReward(assignedCashReward);
+                appState.stats.checkpoints += checkpointsReached;
+                alert(`Koniec cyklu! Nagroda checkpoint: +${assignedCashReward.toFixed(2)}$`);
+            } else {
+                alert("Koniec cyklu! Brak minimalnego progu (3000 pkt).");
+            }
+
+            appState.points = 0;
+            appState.resetTimerSeconds = 3 * 60 * 60;
+            updateGlobalUI();
+            saveGameState();
+        }
+
+        function processDailyPassCheck() {
+            const currentMs = Date.now();
+            const fullDayMs = 24 * 60 * 60 * 1000;
+
+            if (appState.lastDailyClaimTimestamp === 0) {
+                claimDayReward();
+            } else if ((currentMs - appState.lastDailyClaimTimestamp) > fullDayMs) {
+                if ((currentMs - appState.lastDailyClaimTimestamp) < (2 * fullDayMs)) {
+                    appState.dailyDay = appState.dailyDay >= 7 ? 1 : appState.dailyDay + 1;
+                } else {
+                    appState.dailyDay = 1;
+                }
+                claimDayReward();
+            }
+            renderDailyPassUI();
+        }
+
+        function claimDayReward() {
+            const rewardValue = dailyPayouts[appState.dailyDay - 1];
+            injectBalanceReward(rewardValue);
+            appState.lastDailyClaimTimestamp = Date.now();
+            saveGameState();
+        }
+
+        function renderDailyPassUI() {
+            document.getElementById('daily-streak-indicator').innerText = `Dzień ${appState.dailyDay}`;
+            const grid = document.getElementById('daily-pass-grid');
+            grid.innerHTML = '';
+            for (let i = 1; i <= 7; i++) {
+                const dayBlock = document.createElement('div');
+                dayBlock.className = `daily-day ${i === appState.dailyDay ? 'active' : ''} ${i < appState.dailyDay ? 'completed' : ''}`;
+                dayBlock.innerHTML = `
+                    <div>Dzień ${i}</div>
+                    <div class="reward">${dailyPayouts[i-1].toFixed(2)}$</div>
+                `;
+                grid.appendChild(dayBlock);
+            }
+        }
+
+        setInterval(() => {
+            if (document.getElementById('entry-ad-overlay').style.display === 'flex') return;
+            appState.stats.timeSpent++;
+
+            if (appState.resetTimerSeconds > 0) appState.resetTimerSeconds--;
+            else forceIntervalReset();
+
+            if (appState.timeRewardSeconds > 0) {
+                appState.timeRewardSeconds--;
+            } else {
+                appState.points = Math.min(10000, appState.points + 26);
+                appState.stats.points += 26;
+                appState.timeRewardSeconds = 20 * 60;
+                triggerBumpAnimation(document.getElementById('points-display'));
+            }
+
+            refreshClocksOnly();
+            if (appState.stats.timeSpent % 15 === 0) saveGameState();
+        }, 1000);
+
+        function updateGlobalUI() {
+            document.getElementById('balance').innerText = `${appState.balance.toFixed(2)}$`;
+            document.getElementById('points-display').innerText = `${appState.points} / 10000`;
+
+            const percentages = (appState.points / 10000) * 100;
+            document.getElementById('main-progress').style.width = `${percentages}%`;
+            document.getElementById('draws-left-counter').innerText = `${appState.drawsLeft} / 7`;
+
+            const refillContainer = document.getElementById('draws-refill-box');
+            if (appState.drawsLeft <= 0) {
+                document.getElementById('btn-main-draw').disabled = true;
+                document.getElementById('btn-slots-trigger').disabled = true;
+                refillContainer.style.display = 'block';
+            } else if (document.getElementById('risk-panel').style.display !== 'flex') {
+                document.getElementById('btn-main-draw').disabled = false;
+                document.getElementById('btn-slots-trigger').disabled = false;
+                refillContainer.style.display = 'none';
+            }
+
+            document.getElementById('risk-streak-count').innerText = appState.riskStreak;
+
+            document.getElementById('stat-draws').innerText = appState.stats.draws;
+            document.getElementById('stat-points').innerText = appState.stats.points;
+            document.getElementById('stat-dollars').innerText = `${appState.stats.dollars.toFixed(2)}$`;
+            document.getElementById('stat-ads').innerText = appState.stats.ads;
+            document.getElementById('stat-checkpoints').innerText = appState.stats.checkpoints;
+            document.getElementById('stat-resets').innerText = appState.stats.resets;
+
+            const historyContainer = document.getElementById('history-render-box');
+            historyContainer.innerHTML = '';
+            appState.history.forEach(log => {
+                const entry = document.createElement('div');
+                entry.className = 'history-item';
+                entry.innerHTML = `
+                    <div>
+                        <strong>[${log.type}] Zysk: +${log.base} pkt</strong><br>
+                        <small style="color:var(--text-muted);">${log.mode} | Reklama: ${log.ad} | ${log.time}</small>
+                    </div>
+                    <div style="color: var(--neon-green); font-weight: 700;">+${log.final} pkt</div>
+                `;
+                historyContainer.appendChild(entry);
+            });
+
+            refreshClocksOnly();
+        }
+
+        function refreshClocksOnly() {
+            let hr = Math.floor(appState.resetTimerSeconds / 3600).toString().padStart(2, '0');
+            let mn = Math.floor((appState.resetTimerSeconds % 3600) / 60).toString().padStart(2, '0');
+            let sc = (appState.resetTimerSeconds % 60).toString().padStart(2, '0');
+            document.getElementById('reset-clock').innerText = `${hr}:${mn}:${sc}`;
+
+            let rMn = Math.floor(appState.timeRewardSeconds / 60).toString().padStart(2, '0');
+            let rSc = (appState.timeRewardSeconds % 60).toString().padStart(2, '0');
+            document.getElementById('reward-clock').innerText = `${rMn}:${rSc}`;
+            document.getElementById('stat-time').innerText = `${Math.floor(appState.stats.timeSpent / 60)}m ${appState.stats.timeSpent % 60}s`;
+        }
+
+        function triggerBumpAnimation(htmlElement) {
+            htmlElement.classList.remove('bump');
+            void htmlElement.offsetWidth;
+            htmlElement.classList.add('bump');
+        }
+
+        window.onload = () => {
+            loadGameState();
+            runEntryAd();
+        };
+    </script>
+</body>
+</html>
